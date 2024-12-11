@@ -1,5 +1,13 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Form } from "@remix-run/react";
+import { Form, useActionData } from "@remix-run/react";
+import { addUser, findUserByEmailAndPassword, User } from "users";
+import { v4 as uuidv4 } from "uuid";
+
+type ActionData = {
+  error?: string,
+  user?: User
+}
+
 
 export const meta: MetaFunction = () => {
   return [
@@ -8,7 +16,44 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+// the action and laoder function runs on the server NOT the client
+export const action = async ({ request }: { request: Request }) => {
+  // destructure form data
+  const formData = await request.formData();
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  // obv api call would go here but we are using mock db
+
+  if (!email || !password) {
+    return Response.json({ error: "Email and password are required." },
+      { status: 400 }
+    );
+  }
+
+  const newUser = {
+    id: uuidv4(),
+    name,
+    email,
+    password
+  };
+
+  const existingUser = findUserByEmailAndPassword(email, password)
+
+  const user = existingUser || newUser
+
+  if (!existingUser) {
+    addUser(user)
+  }
+
+  return Response.json({ user }, { status: 200 })
+};
+
+
+
 export default function Index() {
+  const actionData: ActionData = useActionData();
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
