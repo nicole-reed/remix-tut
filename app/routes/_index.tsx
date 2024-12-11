@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useNavigate } from "@remix-run/react";
+import { useEffect } from "react";
 import { addUser, findUserByEmailAndPassword, User } from "users";
 import { v4 as uuidv4 } from "uuid";
 
@@ -53,7 +54,22 @@ export const action = async ({ request }: { request: Request }) => {
 
 
 export default function Index() {
-  const actionData: ActionData = useActionData();
+  const actionData = useActionData<ActionData>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userLogged")
+    if (storedUser) {
+      const user = JSON.parse(storedUser)
+      location.pathname = `/profile/${user.id}` // i think when working with normal db you would use navigate, but since its local storage this is a workaround
+    }
+
+    if (actionData?.user) {
+      localStorage.setItem("userLogged", JSON.stringify(actionData.user))
+      navigate(`/profile/${actionData.user.id}`)
+    }
+  }, [actionData, navigate])
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
