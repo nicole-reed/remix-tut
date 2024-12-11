@@ -33,6 +33,13 @@ export const users: User[] = [
 
 // mock db operations
 
+export const findUserByEmailAndPassword = (email: string, password: string) => {
+    const user = users.find(
+        (user) => user.email === email && user.password === password
+    );
+    return user
+};
+
 export const addUser = (user: User) => {
     // look for existing user
     const existingUser = findUserByEmailAndPassword(user.email, user.password)
@@ -42,12 +49,11 @@ export const addUser = (user: User) => {
     }
 };
 
-// export const findUser = (user: User) => { };
-
-export const findUserByEmailAndPassword = (email: string, password: string) => {
-    users.find(
-        (user) => user.email === email && user.password === password
-    );
+export const findUser = (id: string) => {
+    const user = users.find((u) => u.id === id)
+    return user;
 };
+
+
 
 // export const deleteUser = (id: string) => { };
